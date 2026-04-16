@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cinderella-heal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400&family=Shippori+Mincho:wght@300;400&display=swap');
+
+  :root {
+    --ash: #c8bfb0;
+    --ember: #e8d5b0;
+    --dusk: #1a1510;
+    --shadow: #0d0b08;
+    --glow: #f5e8c8;
+    --light: #fff8ee;
+    --pale: rgba(255,248,238,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--shadow);
+    color: var(--glow);
+    font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== STAGE 1: DOOR ===== */
+  #stage-door {
+    text-align: center;
+    animation: fadeIn 2s ease both;
+  }
+
+  .door-wrap {
+    position: relative;
+    width: 120px;
+    height: 200px;
+    margin: 0 auto 48px;
+    cursor: pointer;
+  }
+
+  .door-frame {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(200,191,176,0.3);
+    border-radius: 60px 60px 0 0;
+  }
+
+  .door-panel {
+    position: absolute;
+    inset: 4px;
+    background: linear-gradient(160deg, rgba(30,24,18,0.9), rgba(15,12,8,0.95));
+    border-radius: 56px 56px 0 0;
+    border: 1px solid rgba(200,191,176,0.15);
+    transition: transform 1.2s cubic-bezier(0.4,0,0.2,1);
+    transform-origin: left center;
+    overflow: hidden;
+  }
+
+  .door-panel::before {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(200,191,176,0.4);
+    box-shadow: 0 0 8px rgba(200,191,176,0.3);
+  }
+
+  .door-wrap:hover .door-panel {
+    transform: perspective(400px) rotateY(-25deg);
+  }
+
+  .door-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 56px 56px 0 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(245,232,200,0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  .door-open .door-panel {
+    transform: perspective(400px) rotateY(-85deg) !important;
+  }
+
+  .stage-title {
+    font-size: clamp(13px, 3.5vw, 16px);
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    color: rgba(245,232,200,0.7);
+    margin-bottom: 16px;
+    line-height: 2;
+  }
+
+  .door-label {
+    font-size: clamp(11px, 3vw, 13px);
+    font-weight: 300;
+    letter-spacing: 0.4em;
+    color: rgba(200,191,176,0.4);
+    margin-top: 24px;
+  }
+
+  /* ===== STAGE 2: FIGURE ===== */
+  #stage-figure {
+    display: none;
+    text-align: center;
+    animation: fadeIn 2s ease both;
+    padding: 0 32px;
+    max-width: 480px;
+    width: 100%;
+  }
+
+  #figure-canvas {
+    display: block;
+    margin: 0 auto 40px;
+  }
+
+  /* ===== STAGE 3: INPUT ===== */
+  #stage-input {
+    display: none;
+    text-align: center;
+    animation: fadeIn 1.8s ease both;
+    padding: 0 32px;
+    max-width: 480px;
+    width: 100%;
+  }
+
+  .input-prompt {
+    font-size: clamp(13px, 3.5vw, 15px);
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: rgba(245,232,200,0.6);
+    margin-bottom: 32px;
+    line-height: 2.2;
+  }
+
+  .word-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(200,191,176,0.25);
+    color: var(--glow);
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(15px, 4vw, 18px);
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    padding: 12px 4px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.4s;
+  }
+
+  .word-input::placeholder {
+    color: rgba(200,191,176,0.2);
+    font-size: clamp(12px, 3vw, 14px);
+    letter-spacing: 0.3em;
+  }
+
+  .word-input:focus {
+    border-bottom-color: rgba(245,232,200,0.5);
+  }
+
+  .input-label {
+    color: rgba(245,232,200,0.6);
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(11px, 3vw, 13px);
+    font-weight: 300;
+    letter-spacing: 0.4em;
+    margin-bottom: 20px;
+  }
+
+  .send-btn {
+    margin-top: 36px;
+    background: transparent;
+    border: 1px solid rgba(200,191,176,0.25);
+    color: rgba(245,232,200,0.6);
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(11px, 3vw, 13px);
+    font-weight: 300;
+    letter-spacing: 0.4em;
+    padding: 14px 52px;
+    cursor: pointer;
+    transition: all 0.4s;
+    border-radius: 9999px;
+  }
+
+  .send-btn:hover {
+    background: rgba(200,191,176,0.06);
+    border-color: rgba(245,232,200,0.4);
+    color: rgba(245,232,200,0.9);
+  }
+
+  /* ===== STAGE 4: REPLY ===== */
+  #stage-reply {
+    display: none;
+    text-align: center;
+    animation: fadeIn 2.5s ease both;
+    padding: 0 40px;
+    max-width: 480px;
+    width: 100%;
+  }
+
+  .reply-from {
+    font-size: clamp(10px, 2.5vw, 11px);
+    letter-spacing: 0.5em;
+    color: rgba(200,191,176,0.35);
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  .reply-text {
+    font-size: clamp(16px, 4.5vw, 22px);
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    color: rgba(245,232,200,0.85);
+    line-height: 2.2;
+    min-height: 60px;
+  }
+
+  .reply-cursor {
+    display: inline-block;
+    width: 1px;
+    height: 1.1em;
+    background: rgba(245,232,200,0.5);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1s infinite;
+  }
+
+  /* ===== STAGE 5: FINAL ===== */
+  #stage-final {
+    display: none;
+    text-align: center;
+    animation: fadeIn 3s ease both;
+    padding: 0 40px;
+    max-width: 500px;
+    width: 100%;
+  }
+
+  .final-text {
+    font-size: clamp(18px, 5vw, 26px);
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    color: rgba(245,232,200,0.9);
+    line-height: 2.4;
+  }
+
+  .final-sub {
+    margin-top: 48px;
+    font-size: clamp(10px, 2.8vw, 12px);
+    letter-spacing: 0.45em;
+    color: rgba(200,191,176,0.3);
+    font-weight: 300;
+  }
+
+  .restart-btn {
+    margin-top: 56px;
+    background: transparent;
+    border: 1px solid rgba(200,191,176,0.4);
+    color: rgba(245,232,200,0.7);
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(12px, 3vw, 14px);
+    letter-spacing: 0.5em;
+    cursor: pointer;
+    padding: 14px 52px;
+    transition: all 0.4s;
+    border-radius: 9999px;
+  }
+
+  .restart-btn:hover {
+    background: rgba(200,191,176,0.08);
+    border-color: rgba(245,232,200,0.7);
+    color: rgba(245,232,200,1);
+  }
+
+  /* ===== LOADING ===== */
+  #loading {
+    display: none;
+    text-align: center;
+    animation: fadeIn 0.8s ease both;
+  }
+
+  .loading-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+  }
+
+  .dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(200,191,176,0.4);
+    animation: pulse 1.4s ease infinite;
+  }
+
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* ===== UTILS ===== */
+  .hidden { display: none !important; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 0.8; transform: scale(1.2); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div id="app">
+
+  <!-- Stage 1: Door -->
+  <div id="stage-door">
+    <p class="stage-title">あの頃の君に<br>会いに行きますか</p>
+    <div class="door-wrap" id="door">
+      <div class="door-frame"></div>
+      <div class="door-panel">
+        <div class="door-glow"></div>
+      </div>
+    </div>
+    <p class="door-label">扉に触れて</p>
+  </div>
+
+  <!-- Stage 2: Figure -->
+  <div id="stage-figure">
+    <canvas id="figure-canvas" width="160" height="220"></canvas>
+    <p class="stage-title" style="font-size:clamp(12px,3.2vw,14px); color:rgba(200,191,176,0.5);">
+      あの頃のあなたが<br>そこにいる
+    </p>
+  </div>
+
+  <!-- Stage 3: Input -->
+  <div id="stage-input">
+    <p class="input-label">あの頃に伝えたい言葉</p>
+    <input
+      type="text"
+      class="word-input"
+      id="word-input"
+      placeholder=""
+      maxlength="50"
+    />
+    <br>
+    <button class="send-btn" id="send-btn">healing</button>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="loading-dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- Stage 4: Reply -->
+  <div id="stage-reply">
+    <p class="reply-from">あの頃の自分より</p>
+    <p class="reply-text" id="reply-text"><span class="reply-cursor"></span></p>
+  </div>
+
+  <!-- Stage 5: Final -->
+  <div id="stage-final">
+    <p class="final-text" id="final-text"></p>
+    <button class="restart-btn" id="restart-btn" style="display:none;">もう一度</button>
+  </div>
+
+  <!-- Wind canvas overlay -->
+  <canvas id="wind-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0;transition:opacity 1.5s ease;"></canvas>
+
+</div>
+
+<script>
+// ===== BACKGROUND PARTICLES =====
+const bgCanvas = document.getElementById('bg');
+const bgCtx = bgCanvas.getContext('2d');
+
+let W, H;
+let particles = [];
+let lightParticles = [];
+
+function resize() {
+  W = bgCanvas.width = window.innerWidth;
+  H = bgCanvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.size = Math.random() * 1.2 + 0.2;
+    this.opacity = Math.random() * 0.15 + 0.03;
+    this.speed = Math.random() * 0.2 + 0.05;
+    this.drift = (Math.random() - 0.5) * 0.15;
+  }
+  update() {
+    this.y -= this.speed;
+    this.x += this.drift;
+    if (this.y < -5) { this.y = H + 5; this.x = Math.random() * W; }
+  }
+  draw() {
+    bgCtx.beginPath();
+    bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    bgCtx.fillStyle = `rgba(245,232,200,${this.opacity})`;
+    bgCtx.fill();
+  }
+}
+
+class LightParticle {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.tx = Math.random() * W;
+    this.ty = Math.random() * H * 0.6;
+    this.size = Math.random() * 3 + 1;
+    this.opacity = 0;
+    this.life = 0;
+    this.maxLife = 180 + Math.random() * 120;
+    this.color = Math.random() > 0.5 ? '245,232,200' : '200,191,176';
+  }
+  update() {
+    this.life++;
+    const p = this.life / this.maxLife;
+    this.x += (this.tx - this.x) * 0.012;
+    this.y += (this.ty - this.y) * 0.012;
+    if (p < 0.2) this.opacity = p / 0.2 * 0.7;
+    else if (p > 0.7) this.opacity = (1 - p) / 0.3 * 0.7;
+    else this.opacity = 0.7;
+  }
+  draw() {
+    bgCtx.save();
+    bgCtx.beginPath();
+    bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    bgCtx.fillStyle = `rgba(${this.color},${this.opacity})`;
+    bgCtx.shadowBlur = 10;
+    bgCtx.shadowColor = `rgba(${this.color},0.4)`;
+    bgCtx.fill();
+    bgCtx.restore();
+  }
+  dead() { return this.life >= this.maxLife; }
+}
+
+for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+let animPhase = 'idle'; // idle | burst
+
+function animBG() {
+  bgCtx.clearRect(0, 0, W, H);
+
+  // Vignette
+  const grad = bgCtx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
+  grad.addColorStop(0, 'rgba(20,16,10,0)');
+  grad.addColorStop(1, 'rgba(5,4,3,0.6)');
+  bgCtx.fillStyle = grad;
+  bgCtx.fillRect(0, 0, W, H);
+
+  particles.forEach(p => { p.update(); p.draw(); });
+
+  lightParticles = lightParticles.filter(p => !p.dead());
+  lightParticles.forEach(p => { p.update(); p.draw(); });
+
+  requestAnimationFrame(animBG);
+}
+animBG();
+
+function burstLight(n = 80) {
+  const cx = W / 2, cy = H / 2;
+  for (let i = 0; i < n; i++) {
+    lightParticles.push(new LightParticle(cx, cy));
+  }
+}
+
+// ===== FIGURE CANVAS =====
+const figCanvas = document.getElementById('figure-canvas');
+const figCtx = figCanvas.getContext('2d');
+let figAnim = 0;
+let figLit = false;
+
+function drawFigure() {
+  figCtx.clearRect(0, 0, 160, 220);
+  figAnim += 0.02;
+
+  const cx = 80, baseY = 200;
+  const breathe = Math.sin(figAnim) * 1.5;
+
+  // Shadow beneath
+  figCtx.save();
+  figCtx.beginPath();
+  figCtx.ellipse(cx, baseY + 2, 18, 5, 0, 0, Math.PI * 2);
+  figCtx.fillStyle = 'rgba(0,0,0,0.3)';
+  figCtx.fill();
+  figCtx.restore();
+
+  const alpha = figLit ? 0.9 : 0.5;
+  const color = figLit ? '245,232,200' : '160,150,135';
+
+  figCtx.save();
+  figCtx.shadowBlur = figLit ? 30 : 0;
+  figCtx.shadowColor = figLit ? 'rgba(245,232,200,0.5)' : 'transparent';
+
+  // Body
+  figCtx.beginPath();
+  figCtx.moveTo(cx, baseY - 20 + breathe);
+  figCtx.lineTo(cx - 16, baseY + breathe);
+  figCtx.lineTo(cx + 16, baseY + breathe);
+  figCtx.closePath();
+  figCtx.fillStyle = `rgba(${color},${alpha * 0.6})`;
+  figCtx.fill();
+
+  // Torso
+  figCtx.beginPath();
+  figCtx.moveTo(cx - 10, baseY - 20 + breathe);
+  figCtx.lineTo(cx + 10, baseY - 20 + breathe);
+  figCtx.lineTo(cx + 8, baseY - 50 + breathe);
+  figCtx.lineTo(cx - 8, baseY - 50 + breathe);
+  figCtx.closePath();
+  figCtx.fillStyle = `rgba(${color},${alpha * 0.7})`;
+  figCtx.fill();
+
+  // Head — downcast if not lit
+  const headTilt = figLit ? 0 : 8;
+  figCtx.beginPath();
+  figCtx.arc(cx, baseY - 66 + breathe + headTilt * 0.3, 14, 0, Math.PI * 2);
+  figCtx.fillStyle = `rgba(${color},${alpha * 0.8})`;
+  figCtx.fill();
+
+  figCtx.restore();
+
+  if (!figLit) requestAnimationFrame(drawFigure);
+}
+
+// ===== SHOOTING STAR ANIMATION =====
+const windCanvas = document.getElementById('wind-canvas');
+const windCtx = windCanvas.getContext('2d');
+let windParticles = [];
+let windActive = false;
+let windStartTime = 0;
+const WIND_DURATION = 10000;
+
+function resizeWind() {
+  windCanvas.width = window.innerWidth;
+  windCanvas.height = window.innerHeight;
+}
+resizeWind();
+window.addEventListener('resize', resizeWind);
+
+class ShootingStar {
+  constructor(spawnDelay) {
+    this.spawnDelay = spawnDelay || 0;
+    this.active = false;
+    this.init();
+  }
+  init() {
+    const wW = windCanvas.width, wH = windCanvas.height;
+    // Start from top-right area
+    this.x = wW * 0.5 + Math.random() * wW * 0.55;
+    this.y = Math.random() * wH * 0.35;
+    // Direction: left and DOWN with angle variation (±20deg random)
+    const spd = (6 + Math.random() * 7) / 6;
+    const angleVariation = (Math.random() - 0.5) * 0.7; // ±~20deg in radians
+    const baseAngle = Math.PI * 0.75; // 135deg = top-right to bottom-left
+    this.vx = Math.cos(baseAngle + angleVariation) * spd;
+    this.vy = Math.abs(Math.sin(baseAngle + angleVariation)) * spd; // force vy positive (downward)
+    // Tail length
+    this.tailLen = 80 + Math.random() * 120;
+    this.size = 1.5 + Math.random() * 1.5;
+    this.opacity = 0;
+    this.maxOpacity = 0.7 + Math.random() * 0.3;
+    this.life = 0;
+    this.maxLife = (40 + Math.random() * 30) * 6;
+    // White-blue shimmer
+    const tones = ['255,252,245', '240,245,255', '220,235,255', '255,248,230'];
+    this.color = tones[Math.floor(Math.random() * tones.length)];
+  }
+  update() {
+    if (this.spawnDelay > 0) { this.spawnDelay--; return; }
+    this.active = true;
+    this.life++;
+    this.x += this.vx;
+    this.y += this.vy;
+    const p = this.life / this.maxLife;
+    if (p < 0.2) this.opacity = (p / 0.2) * this.maxOpacity;
+    else this.opacity = ((1 - p) / 0.8) * this.maxOpacity;
+  }
+  draw() {
+    if (!this.active || this.opacity <= 0) return;
+    windCtx.save();
+    // Tail: gradient line from head backwards
+    const tailX = this.x - this.vx / Math.hypot(this.vx, this.vy) * this.tailLen;
+    const tailY = this.y - this.vy / Math.hypot(this.vx, this.vy) * this.tailLen;
+    const grad = windCtx.createLinearGradient(this.x, this.y, tailX, tailY);
+    grad.addColorStop(0, `rgba(${this.color},${this.opacity})`);
+    grad.addColorStop(0.3, `rgba(${this.color},${this.opacity * 0.4})`);
+    grad.addColorStop(1, `rgba(${this.color},0)`);
+    windCtx.beginPath();
+    windCtx.moveTo(this.x, this.y);
+    windCtx.lineTo(tailX, tailY);
+    windCtx.strokeStyle = grad;
+    windCtx.lineWidth = this.size;
+    windCtx.lineCap = 'round';
+    windCtx.stroke();
+    // Head glow
+    windCtx.beginPath();
+    windCtx.arc(this.x, this.y, this.size * 1.2, 0, Math.PI * 2);
+    windCtx.fillStyle = `rgba(${this.color},${this.opacity})`;
+    windCtx.shadowBlur = 12;
+    windCtx.shadowColor = `rgba(${this.color},0.8)`;
+    windCtx.fill();
+    windCtx.restore();
+  }
+  dead() {
+    return this.active && this.life >= this.maxLife;
+  }
+}
+
+let nextStarDelay = 0;
+function spawnStarBatch(elapsed) {
+  const progress = Math.min(elapsed / WIND_DURATION, 1);
+  const bell = Math.sin(progress * Math.PI);
+  nextStarDelay--;
+  if (nextStarDelay <= 0 && bell > 0.1) {
+    windParticles.push(new ShootingStar(0));
+    // Next star appears after 60〜200 random frames
+    nextStarDelay = Math.floor(60 + Math.random() * 140);
+  }
+}
+
+function animWind() {
+  if (!windActive) return;
+  windCtx.clearRect(0, 0, windCanvas.width, windCanvas.height);
+
+  const elapsed = performance.now() - windStartTime;
+  if (elapsed < WIND_DURATION) spawnStarBatch(elapsed);
+
+  windParticles = windParticles.filter(p => !p.dead());
+  windParticles.forEach(p => { p.update(); p.draw(); });
+
+  if (elapsed >= WIND_DURATION && windParticles.length === 0) {
+    windCanvas.style.opacity = '0';
+    windActive = false;
+    windCtx.clearRect(0, 0, windCanvas.width, windCanvas.height);
+    windParticles = [];
+    showStage('stage-final');
+    startPurpleFade();
+    typeTextFinal('final-text', 'あなたが生きてきたから\nそれで十分', () => {
+      document.getElementById('restart-btn').style.display = 'inline-block';
+    });
+    return;
+  }
+
+  requestAnimationFrame(animWind);
+}
+
+function startWind() {
+  windParticles = [];
+  windActive = true;
+  windStartTime = performance.now();
+  windCanvas.style.opacity = '1';
+  nextStarDelay = 20; // first star appears after short delay
+  windParticles.push(new ShootingStar(0));
+  animWind();
+}
+
+function startPurpleFade() {
+  // Phase 1: black → purple over 10s
+  const dur1 = 10000;
+  const start1 = performance.now();
+  function phase1() {
+    const t = Math.min((performance.now() - start1) / dur1, 1);
+    const r = Math.round(13 + (28 - 13) * t);
+    const g = 10;
+    const b = Math.round(8 + (48 - 8) * t);
+    document.body.style.background = `rgb(${r},${g},${b})`;
+    if (t < 1) { requestAnimationFrame(phase1); return; }
+    // Phase 2: purple → navy over 10s
+    const dur2 = 10000;
+    const start2 = performance.now();
+    function phase2() {
+      const t2 = Math.min((performance.now() - start2) / dur2, 1);
+      // purple(28,10,48) → brighter navy(22,30,105)
+      const r2 = Math.round(28 + (22 - 28) * t2);
+      const g2 = Math.round(10 + (30 - 10) * t2);
+      const b2 = Math.round(48 + (105 - 48) * t2);
+      document.body.style.background = `rgb(${r2},${g2},${b2})`;
+      if (t2 < 1) requestAnimationFrame(phase2);
+    }
+    requestAnimationFrame(phase2);
+  }
+  requestAnimationFrame(phase1);
+}
+
+let currentStage = 'door';
+
+function showStage(id) {
+  document.querySelectorAll('#stage-door,#stage-figure,#stage-input,#loading,#stage-reply,#stage-final')
+    .forEach(el => el.style.display = 'none');
+  if (id) document.getElementById(id).style.display = 'block';
+}
+
+// Stage 1 → 2
+document.getElementById('door').addEventListener('click', () => {
+  document.getElementById('door').classList.add('door-open');
+  setTimeout(() => {
+    showStage('stage-figure');
+    drawFigure();
+    setTimeout(() => showStage('stage-input'), 2200);
+  }, 1000);
+});
+
+// Stage 3: Send
+document.getElementById('send-btn').addEventListener('click', async () => {
+  const word = document.getElementById('word-input').value.trim();
+  if (!word) return;
+  showStage('loading');
+
+  figLit = true;
+  figCanvas.style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `あなたは学生時代に辛い思いをした人の「過去の自分」です。
+今の自分から言葉をかけてもらいました。
+詩だけを返してください。質問や聞き返しは絶対にしないでください。
+3〜4行の短い詩。日本語のみ。静かで詩的なトーン。
+「…」は使わないでください。「ね」「よ」「な」などの柔らかい語尾で締めてください。
+受け取った言葉への応答を、そのまま詩として表現してください。`,
+        messages: [{ role: 'user', content: `今の自分から届いた言葉：「${word}」` }]
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'ありがとう。';
+    showStage('stage-reply');
+    typeText('reply-text', reply, () => {
+      setTimeout(() => {
+        startWind();
+      }, 2000);
+    });
+  } catch {
+    showStage('stage-reply');
+    typeText('reply-text', 'ありがとう。ちゃんと聞こえたよ。', () => {
+      setTimeout(() => { startWind(); }, 2000);
+    });
+  }
+});
+
+function typeTextFinal(id, text, onDone) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  const chars = text.split('');
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < chars.length) {
+      if (chars[i] === '\n') {
+        el.appendChild(document.createElement('br'));
+      } else {
+        el.appendChild(document.createTextNode(chars[i]));
+      }
+      i++;
+    } else {
+      clearInterval(interval);
+      if (onDone) onDone();
+    }
+  }, 200); // 80ms × 2.5 = 200ms
+}
+
+function typeText(id, text, onDone) {
+  const el = document.getElementById(id);
+  el.innerHTML = '<span class="reply-cursor"></span>';
+  let i = 0;
+  const cursor = el.querySelector('.reply-cursor');
+  const interval = setInterval(() => {
+    if (i < text.length) {
+      el.insertBefore(document.createTextNode(text[i]), cursor);
+      i++;
+    } else {
+      clearInterval(interval);
+      cursor.remove();
+      if (onDone) onDone();
+    }
+  }, 200);
+}
+
+// Restart
+document.getElementById('restart-btn').addEventListener('click', () => {
+  lightParticles = [];
+  windActive = false;
+  windParticles = [];
+  windCanvas.style.opacity = '0';
+  windCtx.clearRect(0, 0, windCanvas.width, windCanvas.height);
+  document.getElementById('restart-btn').style.display = 'none';
+  document.body.style.background = 'rgb(13,10,8)';
+  document.getElementById('door').classList.remove('door-open');
+  document.getElementById('word-input').value = '';
+  showStage('stage-door');
+});
+</script>
+</body>
+</html>

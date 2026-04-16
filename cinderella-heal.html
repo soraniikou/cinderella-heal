@@ -231,6 +231,10 @@
     font-weight: 300;
   }
 
+  .reply-comfort {
+    margin-bottom: 40px;
+  }
+
   .reply-text {
     font-size: clamp(16px, 4.5vw, 22px);
     font-weight: 300;
@@ -391,6 +395,7 @@
 
   <!-- Stage 4: Reply -->
   <div id="stage-reply">
+    <p class="reply-text reply-comfort" id="comfort-text"></p>
     <p class="reply-from">あの頃の自分より</p>
     <p class="reply-text" id="reply-text"><span class="reply-cursor"></span></p>
   </div>
@@ -775,17 +780,9 @@ document.getElementById('send-btn').addEventListener('click', async () => {
     });
     const data = await res.json();
     const reply = data.content?.[0]?.text || 'ありがとう。';
-    showStage('stage-reply');
-    typeText('reply-text', reply, () => {
-      setTimeout(() => {
-        startWind();
-      }, 2000);
-    });
+    showReplyWithRandomComfort(reply);
   } catch {
-    showStage('stage-reply');
-    typeText('reply-text', 'ありがとう。ちゃんと聞こえたよ。', () => {
-      setTimeout(() => { startWind(); }, 2000);
-    });
+    showReplyWithRandomComfort('ありがとう。ちゃんと聞こえたよ。');
   }
 });
 
@@ -807,6 +804,17 @@ function typeTextFinal(id, text, onDone) {
       if (onDone) onDone();
     }
   }, 200); // 80ms × 2.5 = 200ms
+}
+
+function showReplyWithRandomComfort(replyText) {
+  showStage('stage-reply');
+  const comfortText =
+    COMFORT_VARIANTS[Math.floor(Math.random() * COMFORT_VARIANTS.length)];
+  typeText('comfort-text', comfortText, () => {
+    typeText('reply-text', replyText, () => {
+      setTimeout(() => { startWind(); }, 2000);
+    });
+  });
 }
 
 function typeText(id, text, onDone) {
@@ -839,6 +847,11 @@ document.getElementById('restart-btn').addEventListener('click', () => {
   document.getElementById('word-input').value = '';
   showStage('stage-door');
 });
+const COMFORT_VARIANTS = [
+  'ありがとう　ちゃんと聞こえたよ',
+  '痛かったね　痛かったのは生きているからだよ'
+];
+
 const healAudio = new Audio('ganbattane.mp3');
 document.getElementById('send-btn').addEventListener('click', () => {
   healAudio.load();

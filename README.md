@@ -8,7 +8,7 @@
     3.流れ星と短いメッセージ出てきます
     4.ラストメッセージ
 
-    [体験はこちら](https://cinderella-heal.vercel.app/cinderella-heal.html)
+    [体験](https://cinderella-heal.vercel.app/cinderella-heal.html)
 
     過去を癒やしたくなったらお使いくださいね　
     無理しなくてだいじょうぶ　気がむいたらお使いください

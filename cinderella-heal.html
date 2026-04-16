@@ -680,6 +680,9 @@ function animWind() {
     windParticles = [];
     showStage('stage-final');
     startPurpleFade();
+    setTimeout(() => {
+      healAudio.play().catch(() => {});
+    }, 800);
     typeTextFinal('final-text', 'あなたが生きてきたから\nそれで十分', () => {
       document.getElementById('restart-btn').style.display = 'inline-block';
     });
@@ -837,6 +840,9 @@ document.getElementById('restart-btn').addEventListener('click', () => {
   showStage('stage-door');
 });
 const healAudio = new Audio('ganbattane.mp3');
+document.getElementById('send-btn').addEventListener('click', () => {
+  healAudio.load();
+}, { once: true });
 </script>
 </body>
 </html>

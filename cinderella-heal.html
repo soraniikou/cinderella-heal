@@ -782,7 +782,7 @@ document.getElementById('send-btn').addEventListener('click', async () => {
     const reply = data.content?.[0]?.text || 'ありがとう。';
     showReplyWithRandomComfort(reply);
   } catch {
-    showReplyWithRandomComfort('ありがとう。ちゃんと聞こえたよ。');
+    showReplyWithRandomComfort('');
   }
 });
 
@@ -808,9 +808,21 @@ function typeTextFinal(id, text, onDone) {
 
 function showReplyWithRandomComfort(replyText) {
   showStage('stage-reply');
+  const replyFromEl = document.querySelector('#stage-reply .reply-from');
+  const replyTextEl = document.getElementById('reply-text');
+  replyFromEl.style.display = '';
+  replyTextEl.style.display = '';
   const comfortText =
     COMFORT_VARIANTS[Math.floor(Math.random() * COMFORT_VARIANTS.length)];
   typeText('comfort-text', comfortText, () => {
+    const trimmed = (replyText || '').trim();
+    if (!trimmed) {
+      replyFromEl.style.display = 'none';
+      replyTextEl.style.display = 'none';
+      replyTextEl.innerHTML = '';
+      setTimeout(() => { startWind(); }, 2000);
+      return;
+    }
     typeText('reply-text', replyText, () => {
       setTimeout(() => { startWind(); }, 2000);
     });
@@ -849,7 +861,7 @@ document.getElementById('restart-btn').addEventListener('click', () => {
 });
 const COMFORT_VARIANTS = [
   'ありがとう　ちゃんと聞こえたよ',
-  '痛かったね　痛かったのは生きているからだよ'
+  '痛かったのは生きているからだよ'
 ];
 
 const healAudio = new Audio('ganbattane.mp3');

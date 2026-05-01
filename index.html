@@ -280,6 +280,28 @@
     font-weight: 300;
   }
 
+  .final-song-link {
+    display: none;
+    margin-top: 28px;
+    font-size: 0.85em;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(232, 213, 176, 0.18);
+    padding-bottom: 2px;
+    transition: color 0.5s ease, border-bottom-color 0.5s ease, opacity 0.5s ease;
+    cursor: pointer;
+    opacity: 0.92;
+  }
+
+  .final-song-link:hover {
+    color: rgba(245, 232, 200, 0.82);
+    border-bottom-color: rgba(245, 232, 200, 0.35);
+    opacity: 1;
+  }
+
   .restart-btn {
     margin-top: 56px;
     background: transparent;
@@ -403,6 +425,7 @@
   <!-- Stage 5: Final -->
   <div id="stage-final">
     <p class="final-text" id="final-text"></p>
+    <a class="final-song-link" id="final-song-link" href="https://stand.fm/episodes/69e4a1a1a1cca69f435816cf" target="_blank" rel="noopener noreferrer" style="display:none;">🎵 この物語の歌を聴く</a>
     <button class="restart-btn" id="restart-btn" style="display:none;">もう一度</button>
   </div>
 
@@ -689,6 +712,7 @@ function animWind() {
       healAudio.play().catch(() => {});
     }, 800);
     typeTextFinal('final-text', 'あなたが生きてきたから\nそれで十分\n\nThat you lived ー that is enough.', () => {
+      document.getElementById('final-song-link').style.display = 'inline-block';
       document.getElementById('restart-btn').style.display = 'inline-block';
     });
     return;
@@ -854,6 +878,7 @@ document.getElementById('restart-btn').addEventListener('click', () => {
   windCanvas.style.opacity = '0';
   windCtx.clearRect(0, 0, windCanvas.width, windCanvas.height);
   document.getElementById('restart-btn').style.display = 'none';
+  document.getElementById('final-song-link').style.display = 'none';
   document.body.style.background = 'rgb(13,10,8)';
   document.getElementById('door').classList.remove('door-open');
   document.getElementById('word-input').value = '';

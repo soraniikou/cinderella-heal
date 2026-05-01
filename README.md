@@ -10,7 +10,7 @@
 
     
 
-[こちらから体験いただけます](https://cinderella-heal.vercel.app/cinderella-heal.html)
+[こちらから体験いただけます](https://cinderella-heal.vercel.app/)
 
 　　過去を癒やしたくなったらお使いくださいね
 

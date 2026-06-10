@@ -297,8 +297,9 @@
 
   .final-star {
     position: absolute;
-    top: calc(16% + 96px);
-    left: calc(58% - 34px);
+    /* starts far away from the moon */
+    top: 72%;
+    left: 10%;
     width: 7px;
     height: 7px;
     border-radius: 50%;
@@ -306,6 +307,13 @@
     box-shadow: 0 0 14px 5px rgba(255,252,240,0.55);
     filter: blur(1.5px);
     animation: twinkle 3.5s ease-in-out infinite;
+    transition: top 30s ease-in-out, left 30s ease-in-out;
+  }
+
+  /* slowly drifts toward the crescent over 30s */
+  #final-sky.star-approach .final-star {
+    top: calc(16% + 96px);
+    left: calc(58% - 34px);
   }
 
   @keyframes twinkle {
@@ -740,7 +748,9 @@ function animWind() {
     windCtx.clearRect(0, 0, windCanvas.width, windCanvas.height);
     windParticles = [];
     showStage('stage-final');
-    document.getElementById('final-sky').style.opacity = '1';
+    const finalSky = document.getElementById('final-sky');
+    finalSky.style.opacity = '1';
+    requestAnimationFrame(() => finalSky.classList.add('star-approach'));
     startPurpleFade();
     setTimeout(() => {
       healAudio.play().catch(() => {});
@@ -911,7 +921,14 @@ document.getElementById('restart-btn').addEventListener('click', () => {
   windCanvas.style.opacity = '0';
   windCtx.clearRect(0, 0, windCanvas.width, windCanvas.height);
   document.getElementById('restart-btn').style.display = 'none';
-  document.getElementById('final-sky').style.opacity = '0';
+  const finalSkyEl = document.getElementById('final-sky');
+  finalSkyEl.style.opacity = '0';
+  // reset the star to its start position instantly (no 30s transition back)
+  const starEl = finalSkyEl.querySelector('.final-star');
+  starEl.style.transition = 'none';
+  finalSkyEl.classList.remove('star-approach');
+  void starEl.offsetWidth;
+  starEl.style.transition = '';
   document.body.style.background = 'rgb(13,10,8)';
   document.getElementById('door').classList.remove('door-open');
   document.getElementById('word-input').value = '';

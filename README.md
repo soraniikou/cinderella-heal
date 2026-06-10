@@ -22,4 +22,10 @@
 <img src="スクリーンショット 2026-04-17 070358.png" width="45%"> <!-- びっくりマーク！画像 kenshi310 -->
 <img src="kenshi310.png" width="100%" alt="kenshi310">
 
-    
+About this App / Privacy Policy
+
+cinderella-heal never sends your words anywhere. We do not store them.
+
+The words you type here—"words you wish to tell your past self"—are processed only within your screen and are never transmitted to any external server. Once you close the app, your words vanish completely without a trace. We do not record, collect, or share them.
+
+So please feel safe to write what you cannot tell anyone else. This is a space exclusively for you. 

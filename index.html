@@ -272,6 +272,16 @@
     line-height: 2.4;
   }
 
+  /* PC screens: keep each sentence on a single line */
+  @media (min-width: 768px) {
+    #stage-final {
+      max-width: none;
+    }
+    .final-text {
+      white-space: nowrap;
+    }
+  }
+
   .final-sub {
     margin-top: 48px;
     font-size: clamp(10px, 2.8vw, 12px);

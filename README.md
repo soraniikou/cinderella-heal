@@ -19,5 +19,7 @@
 
     
 <img src="スクリーンショット 2026-04-17 065410.png" width="45%"> <img src="スクリーンショット 2026-04-17 065458.png" width="45%">
-<img src="スクリーンショット 2026-04-17 070358.png" width="45%"> 
+<img src="スクリーンショット 2026-04-17 070358.png" width="45%"> <!-- びっくりマーク！画像 kenshi310 -->
+<img src="kenshi310.png" width="100%" alt="kenshi310">
+
     

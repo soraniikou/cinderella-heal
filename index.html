@@ -272,6 +272,47 @@
     line-height: 2.4;
   }
 
+  /* Final screen background: crescent moon & first star */
+  #final-sky {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 4s ease;
+  }
+
+  .final-moon {
+    position: absolute;
+    top: 16%;
+    left: 58%;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    /* offset shadow on a transparent circle = crescent shape */
+    box-shadow: -26px 16px 0 -6px rgba(245,232,200,0.55);
+    transform: rotate(-15deg);
+    filter: blur(7px);
+  }
+
+  .final-star {
+    position: absolute;
+    top: calc(16% + 96px);
+    left: calc(58% - 34px);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,252,240,0.95);
+    box-shadow: 0 0 14px 5px rgba(255,252,240,0.55);
+    filter: blur(1.5px);
+    animation: twinkle 3.5s ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
   /* PC screens: keep each sentence on a single line */
   @media (min-width: 768px) {
     #stage-final {
@@ -357,6 +398,11 @@
 <body>
 
 <canvas id="bg"></canvas>
+
+<div id="final-sky">
+  <div class="final-moon"></div>
+  <div class="final-star"></div>
+</div>
 
 <div id="app">
 
@@ -694,6 +740,7 @@ function animWind() {
     windCtx.clearRect(0, 0, windCanvas.width, windCanvas.height);
     windParticles = [];
     showStage('stage-final');
+    document.getElementById('final-sky').style.opacity = '1';
     startPurpleFade();
     setTimeout(() => {
       healAudio.play().catch(() => {});
@@ -864,6 +911,7 @@ document.getElementById('restart-btn').addEventListener('click', () => {
   windCanvas.style.opacity = '0';
   windCtx.clearRect(0, 0, windCanvas.width, windCanvas.height);
   document.getElementById('restart-btn').style.display = 'none';
+  document.getElementById('final-sky').style.opacity = '0';
   document.body.style.background = 'rgb(13,10,8)';
   document.getElementById('door').classList.remove('door-open');
   document.getElementById('word-input').value = '';

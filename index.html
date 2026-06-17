@@ -752,9 +752,6 @@ function animWind() {
     finalSky.style.opacity = '1';
     requestAnimationFrame(() => finalSky.classList.add('star-approach'));
     startPurpleFade();
-    setTimeout(() => {
-      healAudio.play().catch(() => {});
-    }, 800);
     typeTextFinal('final-text', 'あなたが生きてくれてるから十分\n\nThat you lived ー that is enough.', () => {
       document.getElementById('restart-btn').style.display = 'block';
     });

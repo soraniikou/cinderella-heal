@@ -20,4 +20,12 @@
     
 <img src="スクリーンショット 2026-04-17 065410.png" width="45%"> <img src="スクリーンショット 2026-04-17 065458.png" width="45%">
 <img src="スクリーンショット 2026-04-17 070358.png" width="45%"> <img src="スクリーンショット 2026-04-17 070440.png" width="45%">
+
+About this App / Privacy Policy
+
+cinderella-heal never sends your words anywhere. We do not store them.
+
+The words you type here—"words you wish to tell your past self"—are processed only within your screen and are never transmitted to any external server. Once you close the app, your words vanish completely without a trace. We do not record, collect, or share them.
+
+So please feel safe to write what you cannot tell anyone else. This is a space exclusively for you.
     
